@@ -1,0 +1,64 @@
+---------------------
+Create Network
+---------------------
+
+docker network create tasks-net
+
+---------------------
+Run MongoDB Container
+---------------------
+
+docker run --name mongodb \
+  -e MONGO_INITDB_ROOT_USERNAME=lazar \
+  -e MONGO_INITDB_ROOT_PASSWORD=secret \
+  -v data:/data/db \
+  --rm \
+  -d \
+  --network tasks-net \
+  mongo
+
+---------------------
+Build Node API Image
+---------------------
+
+docker build -t tasks-node .
+
+---------------------
+Run Node API Container
+---------------------
+
+docker run --name tasks-backend \
+  -e MONGODB_USERNAME=lazar \
+  -e MONGODB_PASSWORD=secret \
+  -v logs:/app/logs \
+  -v C:\Users\Lazar\Desktop\Task-list\backend:/app \
+  -v /app/node_modules \
+  --rm \
+  -d \
+  --network tasks-net \
+  -p 80:80 \
+  tasks-node
+
+---------------------
+Build React SPA Image
+---------------------
+
+docker build -t tasks-react .
+
+---------------------
+Run React SPA Container
+---------------------
+
+docker run --name tasks-frontend \
+  -v C:\Users\Lazar\Desktop\Task-list\frontend\src:/app/src \
+  --rm \
+  -d \
+  -p 3000:3000 \
+  -it \
+  tasks-react
+
+---------------------
+Stop all Containers
+---------------------
+
+docker stop mongodb tasks-backend tasks-frontend
